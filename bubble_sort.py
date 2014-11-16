@@ -6,5 +6,5 @@ def bubblesort(numbers):
             print(i,j)
             print(numbers)
 
-numbers = [1,5,3,82,752,100,20,10001,90,100]
+numbers = [10,5,3,82,752,100,20,10001,90,100]
 bubblesort(numbers)

@@ -4,7 +4,7 @@
 # @Author  : Xin(skywater@gmail.com)
 # @Link    : playbear.github.io
 
-f = open('sina.txt')
+f = open('work.txt')
 data = {}
 for line in f.readlines():
     line = line.strip().split()
@@ -118,7 +118,7 @@ while True:
         continue
 
 
-f = open('sina.txt', 'w+')
+f = open('work.txt', 'w+')
 data_list = []
 for k, v in data.items():
     data_list.append(k +' ' + ' '.join(v))

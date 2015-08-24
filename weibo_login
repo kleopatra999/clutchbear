@@ -18,7 +18,7 @@ soup = BeautifulSoup(html, "html.parser")
 password = soup.find('input', {'type': 'password'}).get('name')
 vk = soup.find('input', {'name': 'vk'}).get('value')
 print password, vk
-post_data[password] = 'xin9744069'
+post_data[password] = 'xxxxx'
 post_data['vk'] = vk
 new_html = requests.post(url, data=post_data).content
 print new_html

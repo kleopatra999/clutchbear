@@ -1,0 +1,42 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import requests
+
+my_headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36',
+    'Host': 'www.hupu.com',
+    'Referer': 'http://passport.hupu.com/pc/login?project=bbs&from=pc'
+}
+
+s = requests.session()
+
+data = {
+    'username': 'skywater',
+    'password': 'xxxxxx',
+}
+verifyimg_url = 'http://passport.hupu.com/pc/verifyimg'
+print verifyimg_url
+f = open('img.jpg', 'wb')
+imgreq = requests.get(verifyimg_url)
+f.write(imgreq.content)
+f.close()
+verifyimg = raw_input('verifyimg code:\n').strip()
+data['verifyCode'] = verifyimg
+
+
+loginURL = 'http://passport.hupu.com/pc/login/member.action'
+reqlogin = s.post(loginURL, data=data, headers=my_headers)
+uid = str(reqlogin.json()['msg']['uid'])
+tag = str(reqlogin.json()['msg']['tag'])
+url = 'http://passport.hupu.com/m/2/login/crossdomain?uid=' + uid + '&freeLogin=true&tag=' + tag
+print url
+
+req = s.get(url, headers=my_headers)
+req = s.get('http://passport.hupu.com/pc/redirectJumpUrl', headers=my_headers)
+
+cookies = req.cookies
+
+res = s.get('http://bbs.hupu.com/xhw', headers=my_headers, cookies=cookies)
+
+f = open('hupu.html', 'w')
+f.write(res.content)

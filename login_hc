@@ -1,42 +1,75 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import requests
+import time
+import sys
 
+# 登录的头部信息
 my_headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36',
-    'Host': 'www.hupu.com',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0',
+    'Host': 'passport.hupu.com',
     'Referer': 'http://passport.hupu.com/pc/login?project=bbs&from=pc'
 }
 
 s = requests.session()
 
+# 用户名和密码的post信息
 data = {
-    'username': 'skywater',
-    'password': 'xxxxxx',
+    'username': 'username',
+    'password': 'username',
 }
+time.sleep(2)
+# 验证码
 verifyimg_url = 'http://passport.hupu.com/pc/verifyimg'
-print verifyimg_url
+
 f = open('img.jpg', 'wb')
 imgreq = requests.get(verifyimg_url)
 f.write(imgreq.content)
 f.close()
+
+# 验证码目前需要手动输入, 没有找到很精确辨识验证码的库.
 verifyimg = raw_input('verifyimg code:\n').strip()
 data['verifyCode'] = verifyimg
 
 
 loginURL = 'http://passport.hupu.com/pc/login/member.action'
-reqlogin = s.post(loginURL, data=data, headers=my_headers)
-uid = str(reqlogin.json()['msg']['uid'])
-tag = str(reqlogin.json()['msg']['tag'])
-url = 'http://passport.hupu.com/m/2/login/crossdomain?uid=' + uid + '&freeLogin=true&tag=' + tag
-print url
+try:
+    reqlogin = s.post(loginURL, data=data, headers=my_headers)
+    # print reqlogin.json()['code']
+    uid = str(reqlogin.json()['msg']['uid'])
+    tag = str(reqlogin.json()['msg']['tag'])
+except Exception as e:
+    print e
+    sys.exit(1)
+
+
+url = 'http://passport.hupu.com/m/2/login/crossdomain?uid=' + \
+    uid + '&freeLogin=true&tag=' + tag
+# print url
 
 req = s.get(url, headers=my_headers)
 req = s.get('http://passport.hupu.com/pc/redirectJumpUrl', headers=my_headers)
 
 cookies = req.cookies
+time.sleep(2)
 
-res = s.get('http://bbs.hupu.com/xhw', headers=my_headers, cookies=cookies)
+# 这个头部信息跟登录时候不一样,不能用那个的.
+liangle_headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0',
+                   'Host': 'bbs.hupu.com',
+                   'Referer': 'http://bbs.hupu.com'
+                   }
 
-f = open('hupu.html', 'w')
-f.write(res.content)
+# authorid是被点亮那个回帖人的数字id, fid是板块数字id, pid此回帖人的第多少个帖子, tid是这个主贴的数字id
+# 这些数据可以用bs4在网页中得到.
+liangle_data = {
+    'authorid': '490881',
+    'fid': '34',
+    'pid': '45008',
+    'state': '1',
+    'tid': '13774396',
+    'token': '4079af26fb75616fea854745376f6e07',
+}
+liangle_req = s.post('http://bbs.hupu.com/ajax/lights.ajax.php',
+                     data=liangle_data, headers=liangle_headers, cookies=cookies)
+
+print liangle_req.content
